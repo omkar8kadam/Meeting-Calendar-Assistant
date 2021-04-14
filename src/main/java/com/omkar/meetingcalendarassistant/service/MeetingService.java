@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface MeetingService {
 
-    public boolean bookMeeting(MeetingRequest meetingRequest);
-    public List<Long> findConflictingParticipants(MeetingRequest meetingRequest);
-    public List<TimeSlot> getFreeSlots(Long empId1, Long empId2, int duration);
+    void bookMeeting(MeetingRequest meetingRequest);
+    List<Long> findConflictingParticipants(MeetingRequest meetingRequest);
+    List<TimeSlot> getFreeSlots(Long empId1, Long empId2, int duration);
 }

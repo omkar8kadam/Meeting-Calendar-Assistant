@@ -1,5 +1,7 @@
 package com.omkar.meetingcalendarassistant.service.impl;
 
+import com.omkar.meetingcalendarassistant.exception.CustomExcpetion;
+import com.omkar.meetingcalendarassistant.exception.EmployeeNotFoundExcpetion;
 import com.omkar.meetingcalendarassistant.exchanges.MeetingRequest;
 import com.omkar.meetingcalendarassistant.model.Employee;
 import com.omkar.meetingcalendarassistant.model.Meeting;
@@ -21,9 +23,11 @@ public class MeetingServiceImpl implements MeetingService {
     EmployeeService employeeService;
 
     @Override
-    public boolean bookMeeting(MeetingRequest meetingRequest) {
+    public void bookMeeting(MeetingRequest meetingRequest) {
 
         Employee meetingOwner = employeeService.getEmployee(meetingRequest.getOwnerId());
+        if (meetingOwner == null)
+            throw new EmployeeNotFoundExcpetion("Meeting owner id: " + meetingRequest.getOwnerId() + " not found");
         Meeting meeting = new Meeting(meetingRequest.getId(),
                 meetingRequest.getStartTime(),
                 meetingRequest.getEndTime(),
@@ -33,28 +37,30 @@ public class MeetingServiceImpl implements MeetingService {
         for (Long id : meetingRequest.getParticipants()) {
             Employee participant = employeeService.getEmployee(id);
             if (participant == null)
-                return false;
+                throw new EmployeeNotFoundExcpetion("Participant id: " + id + " not found");
             bookMeetingForEmployee(participant, meeting);
         }
-        return true;
     }
 
-    public void bookMeetingForEmployee(Employee employee, Meeting meeting) {
+    private void bookMeetingForEmployee(Employee employee, Meeting meeting) {
         int startTime = convertIntoMinutes(meeting.getStartTime());
         int endTime = convertIntoMinutes(meeting.getEndTime());
-        employee.getCalendar().getAllMeetings().add(startTime, endTime);
+        if (employee.getCalendar().getAllMeetings().conflict(startTime, endTime))
+            throw new CustomExcpetion("Cannot book meeting", "There is a conflict with other meeting");
+        employee.getCalendar().getAllMeetings().add(startTime, endTime, meeting.getId());
     }
 
     private int convertIntoMinutes(LocalTime time) {
         return (time.getHour() * 60 + time.getMinute());
     }
 
+    @Override
     public List<Long> findConflictingParticipants(MeetingRequest meetingRequest) {
         List<Long> conflictingParticipantList = new ArrayList<>();
         for (Long id : meetingRequest.getParticipants()) {
             Employee participant = employeeService.getEmployee(id);
             if (participant == null)
-                continue;
+                throw new EmployeeNotFoundExcpetion("Participant id: " + id + " not found");
             int startTime = convertIntoMinutes(meetingRequest.getStartTime());
             int endTime = convertIntoMinutes(meetingRequest.getEndTime());
             if (participant.getCalendar().getAllMeetings().conflict(startTime, endTime))
@@ -63,13 +69,16 @@ public class MeetingServiceImpl implements MeetingService {
         return conflictingParticipantList;
     }
 
+    @Override
     public List<TimeSlot> getFreeSlots(Long empId1, Long empId2, int duration) {
-        List<TimeSlot> timeSlots = new ArrayList<>();
+        List<TimeSlot> timeSlots;
 
         Employee emp1 = employeeService.getEmployee(empId1);
         Employee emp2 = employeeService.getEmployee(empId2);
-        if (emp1 == null || emp2 == null)
-            return timeSlots;
+        if (emp1 == null)
+            throw new EmployeeNotFoundExcpetion("Employee id: " + empId1 + " not found");
+        if (emp2 == null)
+            throw new EmployeeNotFoundExcpetion("Employee id: " + empId2 + " not found");
 
         List<TimeSlot> commonTimeSlots = getCommonTimeSlots(emp1, emp2);
 
@@ -81,19 +90,24 @@ public class MeetingServiceImpl implements MeetingService {
     private List<TimeSlot> findSlotsForDuration(List<TimeSlot> commonTimeSlots, int duration) {
         List<TimeSlot> timeSlots = new ArrayList<>();
 
+        if (commonTimeSlots == null || commonTimeSlots.isEmpty()) {
+            timeSlots.add(new TimeSlot(LocalTime.of(0, 0), LocalTime.of(23, 59)));
+            return timeSlots;
+        }
+
         int i=0;
         TimeSlot currSlot = commonTimeSlots.get(i);
 
-        LocalTime startTime = null;
-        LocalTime endTime = null;
-        LocalTime lastEndTime = null;
+        LocalTime startTime;
+        LocalTime endTime;
+        LocalTime lastEndTime = LocalTime.of(23,59);
 
-        if (currSlot.getStartTime().equals(LocalTime.of(00,00))) {
+        if (currSlot.getStartTime().equals(LocalTime.of(0,0))) {
             startTime = currSlot.getEndTime();
             i++;
         }
         else
-            startTime = LocalTime.of(00, 00);
+            startTime = LocalTime.of(0, 0);
 
         while (i < commonTimeSlots.size()) {
             currSlot = commonTimeSlots.get(i);
@@ -112,7 +126,7 @@ public class MeetingServiceImpl implements MeetingService {
     }
 
     private List<TimeSlot> getCommonTimeSlots(Employee emp1, Employee emp2) {
-        List<TimeSlot> commonTimeSlots = new ArrayList<>();
+        List<TimeSlot> commonTimeSlots;
 
         List<TimeSlot> timeSlots1 = emp1.getCalendar().getAllMeetings().getTimeSlotList();
         List<TimeSlot> timeSlots2 = emp2.getCalendar().getAllMeetings().getTimeSlotList();

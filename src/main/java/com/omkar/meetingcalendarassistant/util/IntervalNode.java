@@ -13,6 +13,7 @@ public class IntervalNode {
     private int startTime;
     private int endTime;
     private int maxTime;
+    private Long meetingId;
     private IntervalNode left;
     private IntervalNode right;
 }

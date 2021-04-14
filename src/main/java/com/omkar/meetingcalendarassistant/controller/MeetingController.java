@@ -1,5 +1,6 @@
 package com.omkar.meetingcalendarassistant.controller;
 
+import com.omkar.meetingcalendarassistant.exception.EmployeeNotFoundExcpetion;
 import com.omkar.meetingcalendarassistant.exchanges.MeetingRequest;
 import com.omkar.meetingcalendarassistant.model.Employee;
 import com.omkar.meetingcalendarassistant.model.TimeSlot;
@@ -23,13 +24,8 @@ public class MeetingController {
 
     @PostMapping("/bookMeeting")
     public ResponseEntity<String> bookMeeting(@RequestBody MeetingRequest meetingRequest) {
-        if(employeeService.getEmployee(meetingRequest.getOwnerId()) == null)
-            return ResponseEntity.badRequest().body("Owner id for the meeting is invalid!");
 
-        boolean status = meetingService.bookMeeting(meetingRequest);
-        if (!status)
-            return ResponseEntity.badRequest().body("Booking failed!");
-
+        meetingService.bookMeeting(meetingRequest);
         return ResponseEntity.ok("Meeting booked");
     }
 
@@ -43,12 +39,12 @@ public class MeetingController {
         return ResponseEntity.ok(meetingService.getFreeSlots(empId1, empId2, duration));
     }
 
-    @GetMapping("/printTree")
-    public ResponseEntity<String> printTree(@RequestParam Long id) {
+    @GetMapping("/allMeetingsOfEmployee")
+    public ResponseEntity<List<TimeSlot>> getAllMeetingsOfEmployee(@RequestParam Long id) {
         Employee employee = employeeService.getEmployee(id);
-        if(employee == null)
-            return ResponseEntity.badRequest().body("Employee id invalid!");
-        String treeData = employee.getCalendar().getAllMeetings().printTree();
-        return ResponseEntity.ok(treeData);
+        if (employee == null)
+            throw new EmployeeNotFoundExcpetion("Employee id: " + id + " not found");
+        List<TimeSlot> timeSlotList = employee.getCalendar().getAllMeetings().getTimeSlotList();
+        return ResponseEntity.ok(timeSlotList);
     }
 }
