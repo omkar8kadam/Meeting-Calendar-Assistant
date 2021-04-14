@@ -23,7 +23,7 @@ public class MeetingServiceImpl implements MeetingService {
     EmployeeService employeeService;
 
     @Override
-    public void bookMeeting(MeetingRequest meetingRequest) {
+    public boolean bookMeeting(MeetingRequest meetingRequest) {
 
         Employee meetingOwner = employeeService.getEmployee(meetingRequest.getOwnerId());
         if (meetingOwner == null)
@@ -34,15 +34,19 @@ public class MeetingServiceImpl implements MeetingService {
                 meetingRequest.getAgenda());
         bookMeetingForEmployee(meetingOwner, meeting);
 
-        for (Long id : meetingRequest.getParticipants()) {
-            Employee participant = employeeService.getEmployee(id);
-            if (participant == null)
-                throw new EmployeeNotFoundExcpetion("Participant id: " + id + " not found");
-            bookMeetingForEmployee(participant, meeting);
+        List<Long> participantsList = meetingRequest.getParticipants();
+        if (participantsList != null && !participantsList.isEmpty()) {
+            for (Long id : participantsList) {
+                Employee participant = employeeService.getEmployee(id);
+                if (participant == null)
+                    throw new EmployeeNotFoundExcpetion("Participant id: " + id + " not found");
+                bookMeetingForEmployee(participant, meeting);
+            }
         }
+        return true;
     }
 
-    private void bookMeetingForEmployee(Employee employee, Meeting meeting) {
+    private boolean bookMeetingForEmployee(Employee employee, Meeting meeting) {
         int startTime = convertIntoMinutes(meeting.getStartTime());
         int endTime = convertIntoMinutes(meeting.getEndTime());
 
@@ -50,6 +54,7 @@ public class MeetingServiceImpl implements MeetingService {
             throw new CustomExcpetion("Cannot book meeting", "There is a conflict with other meeting");
 
         employee.getCalendar().getAllMeetings().add(startTime, endTime, meeting.getId());
+        return true;
     }
 
     private int convertIntoMinutes(LocalTime time) {
@@ -59,14 +64,18 @@ public class MeetingServiceImpl implements MeetingService {
     @Override
     public List<Long> findConflictingParticipants(MeetingRequest meetingRequest) {
         List<Long> conflictingParticipantList = new ArrayList<>();
-        for (Long id : meetingRequest.getParticipants()) {
-            Employee participant = employeeService.getEmployee(id);
-            if (participant == null)
-                throw new EmployeeNotFoundExcpetion("Participant id: " + id + " not found");
-            int startTime = convertIntoMinutes(meetingRequest.getStartTime());
-            int endTime = convertIntoMinutes(meetingRequest.getEndTime());
-            if (participant.getCalendar().getAllMeetings().conflict(startTime, endTime))
-                conflictingParticipantList.add(participant.getId());
+
+        List<Long> participantsList = meetingRequest.getParticipants();
+        if (participantsList != null && !participantsList.isEmpty()) {
+            for (Long id : participantsList) {
+                Employee participant = employeeService.getEmployee(id);
+                if (participant == null)
+                    throw new EmployeeNotFoundExcpetion("Participant id: " + id + " not found");
+                int startTime = convertIntoMinutes(meetingRequest.getStartTime());
+                int endTime = convertIntoMinutes(meetingRequest.getEndTime());
+                if (participant.getCalendar().getAllMeetings().conflict(startTime, endTime))
+                    conflictingParticipantList.add(participant.getId());
+            }
         }
         return conflictingParticipantList;
     }
