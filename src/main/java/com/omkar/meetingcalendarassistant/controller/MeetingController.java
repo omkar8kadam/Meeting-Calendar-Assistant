@@ -35,12 +35,12 @@ public class MeetingController {
     }
 
     @GetMapping("/freeSlots")
-    public ResponseEntity<List<TimeSlot>> getFreeSlots(@RequestParam Long empId1, @RequestParam Long empId2, @RequestParam int duration) {
-        return ResponseEntity.ok(meetingService.getFreeSlots(empId1, empId2, duration));
+    public ResponseEntity<List<TimeSlot>> getFreeSlots(@RequestParam Long empId1, @RequestParam Long empId2, @RequestParam int durationInMinutes) {
+        return ResponseEntity.ok(meetingService.getFreeSlots(empId1, empId2, durationInMinutes));
     }
 
-    @GetMapping("/allMeetingsOfEmployee")
-    public ResponseEntity<List<TimeSlot>> getAllMeetingsOfEmployee(@RequestParam Long id) {
+    @GetMapping("/allMeetingSlotsOfEmployee")
+    public ResponseEntity<List<TimeSlot>> getAllMeetingSlotsOfEmployee(@RequestParam Long id) {
         Employee employee = employeeService.getEmployee(id);
         if (employee == null)
             throw new EmployeeNotFoundExcpetion("Employee id: " + id + " not found");

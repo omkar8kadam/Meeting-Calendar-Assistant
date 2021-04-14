@@ -17,7 +17,7 @@ public class IntervalSearchTree {
 
     public void add(int startTime, int endTime, Long meetingId) {
         if (startTime >= endTime)
-            throw new CustomExcpetion("Invalid Input", "start time: " + convertIntoTime(startTime) + " cannot be greater than end time: " + convertIntoTime(endTime));
+            throw new CustomExcpetion("Invalid Input", "start time: " + convertIntoTime(startTime) + " cannot be greater than or equal to end time: " + convertIntoTime(endTime));
 
         IntervalNode currNode = root;
         while (currNode != null) {
@@ -42,7 +42,7 @@ public class IntervalSearchTree {
 
     public boolean conflict(int startTime, int endTime) {
         if (startTime >= endTime)
-            throw new CustomExcpetion("Invalid Input", "start time: " + convertIntoTime(startTime) + " cannot be greater than end time: " + convertIntoTime(endTime));
+            throw new CustomExcpetion("Invalid Input", "start time: " + convertIntoTime(startTime) + " cannot be greater than or equal to end time: " + convertIntoTime(endTime));
 
         IntervalNode currNode = root;
         while (currNode != null) {
@@ -78,22 +78,4 @@ public class IntervalSearchTree {
         int mins = minutes - (hours * 60);
         return LocalTime.of(hours, mins);
     }
-
-//    static String treeData;
-//    public String printTree() {
-//        treeData = "";
-//        printTreeHelper(root);
-//        return treeData;
-//    }
-//
-//    private String printTreeHelper(IntervalNode currNode) {
-//        if (currNode == null)
-//            return treeData;
-//        printTreeHelper(currNode.getLeft());
-//        treeData += convertIntoTime(currNode.getStartTime()).toString();
-//        treeData += " to ";
-//        treeData += (convertIntoTime(currNode.getEndTime()).toString() + "\n");
-//        printTreeHelper(currNode.getRight());
-//        return treeData;
-//    }
 }

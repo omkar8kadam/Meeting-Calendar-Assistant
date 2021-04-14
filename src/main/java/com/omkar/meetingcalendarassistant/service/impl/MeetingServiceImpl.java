@@ -45,8 +45,10 @@ public class MeetingServiceImpl implements MeetingService {
     private void bookMeetingForEmployee(Employee employee, Meeting meeting) {
         int startTime = convertIntoMinutes(meeting.getStartTime());
         int endTime = convertIntoMinutes(meeting.getEndTime());
+
         if (employee.getCalendar().getAllMeetings().conflict(startTime, endTime))
             throw new CustomExcpetion("Cannot book meeting", "There is a conflict with other meeting");
+
         employee.getCalendar().getAllMeetings().add(startTime, endTime, meeting.getId());
     }
 
@@ -70,7 +72,7 @@ public class MeetingServiceImpl implements MeetingService {
     }
 
     @Override
-    public List<TimeSlot> getFreeSlots(Long empId1, Long empId2, int duration) {
+    public List<TimeSlot> getFreeSlots(Long empId1, Long empId2, int durationInMinutes) {
         List<TimeSlot> timeSlots;
 
         Employee emp1 = employeeService.getEmployee(empId1);
@@ -82,12 +84,12 @@ public class MeetingServiceImpl implements MeetingService {
 
         List<TimeSlot> commonTimeSlots = getCommonTimeSlots(emp1, emp2);
 
-        timeSlots = findSlotsForDuration(commonTimeSlots, duration);
+        timeSlots = findSlotsForDuration(commonTimeSlots, durationInMinutes);
 
         return timeSlots;
     }
 
-    private List<TimeSlot> findSlotsForDuration(List<TimeSlot> commonTimeSlots, int duration) {
+    private List<TimeSlot> findSlotsForDuration(List<TimeSlot> commonTimeSlots, int durationInMinutes) {
         List<TimeSlot> timeSlots = new ArrayList<>();
 
         if (commonTimeSlots == null || commonTimeSlots.isEmpty()) {
@@ -112,7 +114,7 @@ public class MeetingServiceImpl implements MeetingService {
         while (i < commonTimeSlots.size()) {
             currSlot = commonTimeSlots.get(i);
             endTime = currSlot.getStartTime();
-            if (startTime.until(endTime, ChronoUnit.MINUTES) >= duration)
+            if (startTime.until(endTime, ChronoUnit.MINUTES) >= durationInMinutes)
                 timeSlots.add(new TimeSlot(startTime, endTime));
             lastEndTime = currSlot.getStartTime();
             startTime = currSlot.getEndTime();
@@ -120,7 +122,7 @@ public class MeetingServiceImpl implements MeetingService {
         }
         if (!commonTimeSlots.get(i-1).getEndTime().equals(LocalTime.of(23,59)))
             lastEndTime = LocalTime.of(23,59);
-        if (startTime.until(lastEndTime, ChronoUnit.MINUTES) >= duration)
+        if (startTime.until(lastEndTime, ChronoUnit.MINUTES) >= durationInMinutes)
             timeSlots.add(new TimeSlot(startTime, lastEndTime));
         return timeSlots;
     }
