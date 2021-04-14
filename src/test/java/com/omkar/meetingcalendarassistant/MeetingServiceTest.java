@@ -1,8 +1,10 @@
-package com.omkar.meetingcalendarassistant.service;
+package com.omkar.meetingcalendarassistant;
 
 import com.omkar.meetingcalendarassistant.exchanges.MeetingRequest;
 import com.omkar.meetingcalendarassistant.model.Employee;
 import com.omkar.meetingcalendarassistant.model.TimeSlot;
+import com.omkar.meetingcalendarassistant.service.EmployeeService;
+import com.omkar.meetingcalendarassistant.service.MeetingService;
 import com.omkar.meetingcalendarassistant.service.impl.MeetingServiceImpl;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
