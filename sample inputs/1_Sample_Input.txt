@@ -1,0 +1,61 @@
+
+Sample Inputs - 
+
+
+On starting the project 5 Employees will be created by default with
+employee id's = 1, 2, 3, 4, 5
+
+
+You need to create meetings using following API's -
+
+POST localhost:8080/api/bookMeeting
+
+	body -> 
+	{
+	    "id": 1,
+	    "date": "2021-04-14",
+	    "startTime": "10:00",
+	    "endTime": "11:00",
+	    "agenda": "meeting about xyz",
+	    "ownerId": 1,
+	    "participants": [2,3]
+	}
+
+POST localhost:8080/api/bookMeeting
+
+	body -> 
+	{
+	    "id": 1,
+	    "date": "2021-04-14",
+	    "startTime": "13:00",
+	    "endTime": "14:00",
+	    "agenda": "meeting about xyz",
+	    "ownerId": 1,
+	    "participants": []
+	}
+
+POST localhost:8080/api/bookMeeting
+
+	body -> 
+	{
+	    "id": 1,
+	    "date": "2021-04-14",
+	    "startTime": "14:30",
+	    "endTime": "15:30",
+	    "agenda": "meeting about xyz",
+	    "ownerId": 2,
+	    "participants": []
+	}
+
+POST localhost:8080/api/bookMeeting
+
+	body -> 
+	{
+	    "id": 1,
+	    "date": "2021-04-14",
+	    "startTime": "15:00",
+	    "endTime": "17:00",
+	    "agenda": "meeting about xyz",
+	    "ownerId": 3,
+	    "participants": []
+	}

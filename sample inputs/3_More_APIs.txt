@@ -1,0 +1,32 @@
+More API's
+
+
+1. Create Employee
+
+POST localhost:8080/api/createEmployee?id=1&name=Omkar
+
+Input as @RequestParam -> id(Long) & name(String)
+
+-----------------
+
+2. Get Employee Details by Id
+
+GET localhost:8080/api/getEmployee?id=1
+
+input - id(Long)
+
+-----------------
+
+3. Get details of all employees
+
+GET localhost:8080/api/getAllEmployees
+
+-----------------
+
+4. Get all meeting slots of an employee
+
+GET localhost:8080/api/allMeetingSlotsOfEmployee?id=2
+
+input - id(Long)
+
+-----------------

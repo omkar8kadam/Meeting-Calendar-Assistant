@@ -1,0 +1,50 @@
+API's to test functionalities - 
+
+-------------
+
+1. To book a meeting with employee
+
+POST localhost:8080/api/bookMeeting
+
+	body -> 
+	{
+	    "id": 1,
+	    "date": "2021-04-14",
+	    "startTime": "08:00",
+	    "endTime": "09:00",
+	    "agenda": "meeting about xyz",
+	    "ownerId": 5,
+	    "participants": []
+	}
+
+It books meeting with employee id: 5 for time 8am - 9am.
+
+-------------
+
+2. To check for free slots between 2 employees for a fixed duration -
+
+GET localhost:8080/api/freeSlots?empId1=1&empId2=2&durationInMinutes=30
+
+
+It takes input as @RequestParam -> empId1(Long), empId2(Long) & durationInMinutes(int)
+
+It returns list of all the time slots where emp1 & emp2 are free and a meeting of given duration is possible.
+
+-------------
+
+3. To find conflicts among participants for a meeting -
+
+POST localhost:8080/api/conflictingParticipants
+
+	body ->
+	{
+	    "id": 1,
+	    "date": "2021-04-14",
+	    "startTime": "15:00",
+	    "endTime": "16:00",
+	    "agenda": "meeting agenda xyz",
+	    "ownerId": 1,
+	    "participants": [1,2,3,4,5]
+	}
+
+It returns list of employee id whose schedule is conflicting with given meeting timing.
