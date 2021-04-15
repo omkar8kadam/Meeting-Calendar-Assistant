@@ -5,12 +5,13 @@ Sample Inputs -
 On starting the project 5 Employees will be created by default with
 employee id's = 1, 2, 3, 4, 5
 
+--------
 
 You need to create meetings using following API's -
 
 POST localhost:8080/api/bookMeeting
 
-	body -> 
+	body(raw, json) -> 
 	{
 	    "id": 1,
 	    "date": "2021-04-14",
@@ -23,7 +24,7 @@ POST localhost:8080/api/bookMeeting
 
 POST localhost:8080/api/bookMeeting
 
-	body -> 
+	body(raw, json) -> 
 	{
 	    "id": 1,
 	    "date": "2021-04-14",
@@ -36,7 +37,7 @@ POST localhost:8080/api/bookMeeting
 
 POST localhost:8080/api/bookMeeting
 
-	body -> 
+	body(raw, json) -> 
 	{
 	    "id": 1,
 	    "date": "2021-04-14",
@@ -49,7 +50,7 @@ POST localhost:8080/api/bookMeeting
 
 POST localhost:8080/api/bookMeeting
 
-	body -> 
+	body(raw, json) -> 
 	{
 	    "id": 1,
 	    "date": "2021-04-14",
@@ -59,3 +60,14 @@ POST localhost:8080/api/bookMeeting
 	    "ownerId": 3,
 	    "participants": []
 	}
+
+---------
+
+After this you can check all the available data using this API -
+
+GET localhost:8080/api/getAllEmployees
+
+It will show all the meetings for all employees
+
+
+--------

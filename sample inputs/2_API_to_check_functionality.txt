@@ -6,7 +6,7 @@ API's to test functionalities -
 
 POST localhost:8080/api/bookMeeting
 
-	body -> 
+	body(raw, json) -> 
 	{
 	    "id": 1,
 	    "date": "2021-04-14",
@@ -36,7 +36,7 @@ It returns list of all the time slots where emp1 & emp2 are free and a meeting o
 
 POST localhost:8080/api/conflictingParticipants
 
-	body ->
+	body(raw, json) ->
 	{
 	    "id": 1,
 	    "date": "2021-04-14",
