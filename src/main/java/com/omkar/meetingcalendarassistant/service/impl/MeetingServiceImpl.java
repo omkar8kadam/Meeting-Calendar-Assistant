@@ -22,9 +22,14 @@ public class MeetingServiceImpl implements MeetingService {
     @Autowired
     EmployeeService employeeService;
 
+    /*
+        Given a meeting request,
+        Books meeting with the owner & all the participants as given in the request
+     */
     @Override
     public boolean bookMeeting(MeetingRequest meetingRequest) {
 
+        // first book meeting for the owner of meeting
         Employee meetingOwner = employeeService.getEmployee(meetingRequest.getOwnerId());
         if (meetingOwner == null)
             throw new EmployeeNotFoundExcpetion("Meeting owner id: " + meetingRequest.getOwnerId() + " not found");
@@ -34,6 +39,7 @@ public class MeetingServiceImpl implements MeetingService {
                 meetingRequest.getAgenda());
         bookMeetingForEmployee(meetingOwner, meeting);
 
+        // books meeting for all participants
         List<Long> participantsList = meetingRequest.getParticipants();
         if (participantsList != null && !participantsList.isEmpty()) {
             for (Long id : participantsList) {
@@ -46,10 +52,12 @@ public class MeetingServiceImpl implements MeetingService {
         return true;
     }
 
+    // Books meeting for particular employee & saves in his calendar
     private boolean bookMeetingForEmployee(Employee employee, Meeting meeting) {
         int startTime = convertIntoMinutes(meeting.getStartTime());
         int endTime = convertIntoMinutes(meeting.getEndTime());
 
+        //check for conflicts in employee's calendar
         if (employee.getCalendar().getAllMeetings().conflict(startTime, endTime))
             throw new CustomExcpetion("Cannot book meeting", "There is a conflict with other meeting");
 
@@ -57,10 +65,16 @@ public class MeetingServiceImpl implements MeetingService {
         return true;
     }
 
+    /* To convert LocalTime field to no. of minutes */
     private int convertIntoMinutes(LocalTime time) {
         return (time.getHour() * 60 + time.getMinute());
     }
 
+    /*
+        Given Meeting Request,
+        finds all the employees from participants list
+        who have conflicts in their calendar with the given meeting timings
+     */
     @Override
     public List<Long> findConflictingParticipants(MeetingRequest meetingRequest) {
         List<Long> conflictingParticipantList = new ArrayList<>();
@@ -80,6 +94,11 @@ public class MeetingServiceImpl implements MeetingService {
         return conflictingParticipantList;
     }
 
+    /*
+        Given employee Id's of two employees & duration(in minutes),
+        finds and returns list of TimeSlots where a meeting for given duration
+        can be scheduled with both
+     */
     @Override
     public List<TimeSlot> getFreeSlots(Long empId1, Long empId2, int durationInMinutes) {
         List<TimeSlot> timeSlots;
@@ -91,13 +110,21 @@ public class MeetingServiceImpl implements MeetingService {
         if (emp2 == null)
             throw new EmployeeNotFoundExcpetion("Employee id: " + empId2 + " not found");
 
+        // first create a list of TimeSlot where both employees are busy in meetings
         List<TimeSlot> commonTimeSlots = getCommonTimeSlots(emp1, emp2);
 
+        // finds the free slots for the day where required duration of meeting can be held
         timeSlots = findSlotsForDuration(commonTimeSlots, durationInMinutes);
 
         return timeSlots;
     }
 
+    /*
+        Given a list of common time slots & duration,
+        for the given day find remaining time slots where both employees have free schedule
+        & a meeting for given duration can be scheduled
+        Returns this list of timeslots
+     */
     private List<TimeSlot> findSlotsForDuration(List<TimeSlot> commonTimeSlots, int durationInMinutes) {
         List<TimeSlot> timeSlots = new ArrayList<>();
 
@@ -136,6 +163,11 @@ public class MeetingServiceImpl implements MeetingService {
         return timeSlots;
     }
 
+    /*
+        Given two employees,
+        extract list of timeslots of their meetings &
+        return a common list of timeslots where both are busy
+     */
     private List<TimeSlot> getCommonTimeSlots(Employee emp1, Employee emp2) {
         List<TimeSlot> commonTimeSlots;
 
@@ -147,6 +179,10 @@ public class MeetingServiceImpl implements MeetingService {
         return commonTimeSlots;
     }
 
+    /*
+        Given list of TimeSlots of both employees,
+        Create a single merged list of TimeSlots where both employees are busy in meetings
+     */
     private List<TimeSlot> mergeCommonTimeSlots(List<TimeSlot> timeSlots1, List<TimeSlot> timeSlots2) {
         List<TimeSlot> timeSlots = new ArrayList<>();
 
@@ -218,14 +254,17 @@ public class MeetingServiceImpl implements MeetingService {
         return timeSlots;
     }
 
+    // Check if the two TimeSlots intersect
     private boolean intersect(TimeSlot ts1, TimeSlot ts2) {
         return ts1.getStartTime().isBefore(ts2.getEndTime()) && ts1.getEndTime().isAfter(ts2.getStartTime());
     }
 
+    // Compare two TimeSlots and return min start time among them
     private LocalTime minStartTime(TimeSlot ts1, TimeSlot ts2) {
         return ts1.getStartTime().isBefore(ts2.getStartTime()) ? ts1.getStartTime() : ts2.getStartTime();
     }
 
+    // Compare two TimeSlots and return max end time among them
     private LocalTime maxEndTime(TimeSlot ts1, TimeSlot ts2) {
         return ts1.getEndTime().isAfter(ts2.getEndTime()) ? ts1.getEndTime() : ts2.getEndTime();
     }
